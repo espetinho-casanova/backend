@@ -1,0 +1,99 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  login     String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[]
+
+  @@map("users")
+}
+
+model Category {
+  id           String    @id @default(uuid())
+  categoryName String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  products     Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  price       Float
+  description String
+  banner      String
+  available   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category   Category    @relation(fields: [categoryId], references: [id])
+  categoryId String
+  items      OrderItem[]
+
+  @@map("products")
+}
+
+model Order {
+  id        String   @id @default(uuid())
+  table     Int?
+  status    Int      @default(0)
+  draft     Boolean  @default(true)
+  name      String?
+  editedBy  String[] @default([])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items  OrderItem[]
+  user   User?       @relation(fields: [userId], references: [id]) // Relacionamento com a tabela User
+  userId String?
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  amount    Int
+  client    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  orderId   String
+  productId String
+
+  observacoes OrderItemDetail[]
+
+  @@map("items")
+}
+
+model OrderItemDetail {
+  id         String   @id @default(uuid())
+  observacao String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  item OrderItem @relation(fields: [orderItemId], references: [id])
+
+  orderItemId String
+
+  @@map("order_item_details")
+}
