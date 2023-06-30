@@ -3,12 +3,13 @@ import { AddItemDetailService } from "../../services/order/AddItemDetailService"
 
 class AddItemDetailController {
   async handle(req: Request, res: Response) {
-    const { observacao, orderItemId } = req.body;
+    const { observacao, orderItemId, ponto } = req.body;
 
     const addItemDetailService = new AddItemDetailService();
 
     const itemDetail = await addItemDetailService.execute({
       observacao,
+      ponto,
       orderItemId,
     });
 

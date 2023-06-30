@@ -87,6 +87,7 @@ model OrderItem {
 
 model OrderItemDetail {
   id         String   @id @default(uuid())
+  ponto      String?
   observacao String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
