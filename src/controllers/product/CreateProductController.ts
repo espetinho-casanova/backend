@@ -1,27 +1,57 @@
 import { Request, Response } from "express";
 import { CreateProductService } from "../../services/product/CreateProductService";
+import { createProductSchema } from "../../validations/productValidations";
 
 class CreateProductController {
   async handle(req: Request, res: Response) {
-    const { name, price, description, categoryId } = req.body;
+    if (!req.file) {
+      throw new Error("Error upload a file!");
+    }
+
+    // Validar dados de entrada
+    const validatedData = createProductSchema.parse(req.body);
+    const {
+      name,
+      price,
+      description,
+      categoryId,
+      ingredientIds,
+      addonIds,
+      canBeUsedInSandwich,
+      hasMeatPoint,
+    } = validatedData;
+
+    const { filename: banner } = req.file;
+
+    // Parse dos dados validados
+    const parsedIngredientIds = ingredientIds
+      ? JSON.parse(ingredientIds).map((id: string) => parseInt(id, 10))
+      : [];
+    const parsedAddonIds = addonIds
+      ? JSON.parse(addonIds).map((id: string) => parseInt(id, 10))
+      : [];
+    const parsedCanBeUsedInSandwich = canBeUsedInSandwich !== undefined
+      ? (canBeUsedInSandwich === "true" || canBeUsedInSandwich === true)
+      : true;
+    const parsedHasMeatPoint = hasMeatPoint !== undefined
+      ? (hasMeatPoint === "true" || hasMeatPoint === true)
+      : false;
 
     const createProductService = new CreateProductService();
 
-    if (!req.file) {
-      throw new Error("Error upload a file!");
-    } else {
-      const { originalname, filename: banner } = req.file;
+    const product = await createProductService.execute({
+      name,
+      price: parseFloat(price),
+      description,
+      banner,
+      categoryId: parseInt(categoryId, 10),
+      ingredientIds: parsedIngredientIds,
+      addonIds: parsedAddonIds,
+      canBeUsedInSandwich: parsedCanBeUsedInSandwich,
+      hasMeatPoint: parsedHasMeatPoint,
+    });
 
-      const product = await createProductService.execute({
-        name,
-        price: parseFloat(price),
-        description,
-        banner,
-        categoryId,
-      });
-
-      return res.json(product);
-    }
+    return res.json(product);
   }
 }
 

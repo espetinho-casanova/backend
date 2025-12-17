@@ -5,10 +5,11 @@ interface UserRequest {
   name: string;
   login: string;
   password: string;
+  roleId?: string | null;
 }
 
 class CreateUserService {
-  async execute({ name, login, password }: UserRequest) {
+  async execute({ name, login, password, roleId }: UserRequest) {
     //Verificar se enviou um login
     if (!login) {
       throw new Error("Preencha o campo login!");
@@ -27,16 +28,36 @@ class CreateUserService {
 
     const passwordHash = await hash(password, 8);
 
+    // Se está definindo um role, verificar se existe
+    if (roleId) {
+      const role = await prismaClient.role.findUnique({
+        where: { id: roleId },
+      });
+
+      if (!role) {
+        throw new Error("Cargo não encontrado");
+      }
+    }
+
     const user = await prismaClient.user.create({
       data: {
         name: name,
         login: login,
         password: passwordHash,
+        roleId: roleId || null,
       },
       select: {
         id: true,
         login: true,
         name: true,
+        roleId: true,
+        role: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+          },
+        },
       },
     });
 

@@ -10,6 +10,27 @@ class DetailUserService {
         id: true,
         name: true,
         login: true,
+        roleId: true,
+        role: {
+          select: {
+            id: true,
+            name: true,
+            description: true,
+            permissions: {
+              select: {
+                permission: {
+                  select: {
+                    id: true,
+                    name: true,
+                    resource: true,
+                    action: true,
+                    description: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
 

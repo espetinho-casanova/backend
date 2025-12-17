@@ -6,8 +6,6 @@ interface CategoryRequest {
 
 class CreateCategoryService {
   async execute({ name }: CategoryRequest) {
-    console.log("name: ", name);
-
     if (name == "") {
       throw new Error("Name invalid");
     }

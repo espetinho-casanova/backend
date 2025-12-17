@@ -2,14 +2,36 @@ import prismaClient from "../../prisma";
 
 class ListCategoryService {
   async execute() {
-    const category = await prismaClient.category.findMany({
+    const categories = await prismaClient.category.findMany({
+      where: {
+        parentId: null,
+      },
       select: {
         id: true,
         categoryName: true,
+        children: {
+          select: {
+            id: true,
+            categoryName: true,
+          },
+        },
       },
     });
 
-    return category;
+    const sortedCategories = categories.sort((a, b) => {
+      const order = ["Espetinhos", "Lanches", "Bebidas"];
+      const indexA = order.indexOf(a.categoryName);
+      const indexB = order.indexOf(b.categoryName);
+      
+      if (indexA !== -1 && indexB !== -1) {
+        return indexA - indexB;
+      }
+      if (indexA !== -1) return -1;
+      if (indexB !== -1) return 1;
+      return a.categoryName.localeCompare(b.categoryName);
+    });
+
+    return sortedCategories;
   }
 }
 

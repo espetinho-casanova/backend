@@ -1,13 +1,16 @@
 import { Request, Response } from "express";
 import { RemoveItemService } from "../../services/order/RemoveItemService";
+import { removeItemSchema } from "../../validations/orderValidations";
 
 class RemoveItemController {
   async handle(req: Request, res: Response) {
-    const { orderItemId } = req.body;
+    // Validar dados de entrada
+    const validatedData = removeItemSchema.parse(req.body);
+    const { orderItemId } = validatedData;
 
     const removeItemService = new RemoveItemService();
 
-    const order = removeItemService.execute({
+    await removeItemService.execute({
       orderItemId,
     });
 

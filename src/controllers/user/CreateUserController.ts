@@ -1,9 +1,16 @@
 import { Request, Response } from "express";
 import { CreateUserService } from "../../services/user/CreateUserService";
+import { createUserSchema } from "../../validations/userValidations";
 
 class CreateUserController {
   async handle(req: Request, res: Response) {
-    const { name, login, password } = req.body;
+    const body = {
+      ...req.body,
+      roleId: req.body.roleId === "" || req.body.roleId === undefined ? null : req.body.roleId,
+    };
+
+    const validatedData = createUserSchema.parse(body);
+    const { name, login, password, roleId } = validatedData;
 
     const createUserService = new CreateUserService();
 
@@ -11,6 +18,7 @@ class CreateUserController {
       name,
       login,
       password,
+      roleId,
     });
 
     return res.json(user);

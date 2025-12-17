@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import { AuthUserService } from "../../services/user/AuthUserService";
+import { authUserSchema } from "../../validations/userValidations";
 
 class AuthUserController {
   async handle(req: Request, res: Response) {
-    const { login, password } = req.body;
+    const validatedData = authUserSchema.parse(req.body);
+    const { login, password } = validatedData;
 
     const authUserService = new AuthUserService();
 

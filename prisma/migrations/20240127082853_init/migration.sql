@@ -12,7 +12,7 @@ CREATE TABLE "users" (
 
 -- CreateTable
 CREATE TABLE "categories" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "categoryName" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE "categories" (
 
 -- CreateTable
 CREATE TABLE "products" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "price" DOUBLE PRECISION NOT NULL,
     "description" TEXT NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE "products" (
     "available" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "categoryId" TEXT NOT NULL,
+    "categoryId" INTEGER NOT NULL,
 
     CONSTRAINT "products_pkey" PRIMARY KEY ("id")
 );
@@ -55,23 +55,15 @@ CREATE TABLE "items" (
     "id" TEXT NOT NULL,
     "amount" INTEGER NOT NULL,
     "client" TEXT NOT NULL,
+    "ponto" TEXT,
+    "detalhes" TEXT,
+    "observacao" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "orderId" TEXT NOT NULL,
-    "productId" TEXT NOT NULL,
+    "productId" INTEGER NOT NULL,
 
     CONSTRAINT "items_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "order_item_details" (
-    "id" TEXT NOT NULL,
-    "observacao" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-    "orderItemId" TEXT NOT NULL,
-
-    CONSTRAINT "order_item_details_pkey" PRIMARY KEY ("id")
 );
 
 -- AddForeignKey
@@ -85,6 +77,3 @@ ALTER TABLE "items" ADD CONSTRAINT "items_orderId_fkey" FOREIGN KEY ("orderId") 
 
 -- AddForeignKey
 ALTER TABLE "items" ADD CONSTRAINT "items_productId_fkey" FOREIGN KEY ("productId") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "order_item_details" ADD CONSTRAINT "order_item_details_orderItemId_fkey" FOREIGN KEY ("orderItemId") REFERENCES "items"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

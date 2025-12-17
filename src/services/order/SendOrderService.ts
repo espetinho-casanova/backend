@@ -1,4 +1,5 @@
 import prismaClient from "../../prisma";
+import { OrderStatus } from "../../utils/constants";
 
 interface orderResquest {
   orderId: string;
@@ -12,7 +13,7 @@ class SendOrderService {
       },
       data: {
         draft: false,
-        status: 1,
+        status: OrderStatus.IN_PREPARATION,
       },
     });
 

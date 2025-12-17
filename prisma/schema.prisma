@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,90 +8,193 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  login     String
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  orders Order[]
+  id            String        @id @default(uuid())
+  name          String
+  login         String        @unique
+  password      String
+  roleId        String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  orders        Order[]
+  waitingQueues WaitingQueue[]
+  role          Role?         @relation(fields: [roleId], references: [id])
 
   @@map("users")
 }
 
+model Role {
+  id          String         @id @default(uuid())
+  name        String         @unique
+  description String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  users       User[]
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String         @id @default(uuid())
+  name        String         @unique
+  description String?
+  resource    String         // Ex: "product", "category", "order", etc.
+  action      String         // Ex: "view", "create", "edit", "delete", "toggle_availability", "update_stock"
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String     @id @default(uuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
 model Category {
-  id           String    @id @default(uuid())
+  id           Int       @id @default(autoincrement())
   categoryName String
+  parentId     Int?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   products     Product[]
+  parent       Category? @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: Cascade)
+  children     Category[] @relation("CategoryHierarchy")
 
   @@map("categories")
 }
 
-model Product {
-  id          String   @id @default(uuid())
-  name        String
-  price       Float
-  description String
-  banner      String
-  available   Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model Ingredient {
+  id           Int                 @id @default(autoincrement())
+  name         String              @unique
+  image        String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  nonRemovable Boolean             @default(false)
+  stock        Int                 @default(999)
+  products     ProductIngredient[]
 
-  category   Category    @relation(fields: [categoryId], references: [id])
-  categoryId String
-  items      OrderItem[]
+  @@map("ingredients")
+}
+
+model Addon {
+  id              Int              @id @default(autoincrement())
+  name            String
+  price           Float
+  image           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  orderItemAddons OrderItemAddon[]
+  products        ProductAddon[]
+
+  @@map("addons")
+}
+
+model Product {
+  id                 Int                 @id @default(autoincrement())
+  name               String
+  price              Float
+  description        String?
+  banner             String?
+  available          Boolean             @default(true)
+  stock              Int                 @default(999) // Quantidade em estoque (resetado diariamente às 16:30)
+  canBeUsedInSandwich Boolean          @default(true) // Se o espetinho pode ser usado no lanche (Xis/Ká)
+  hasMeatPoint      Boolean             @default(true) // Se o produto tem ponto da carne (espetinhos de carne)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  categoryId        Int
+  chosenAsMeatIn     OrderItem[]         @relation("MeatChoiceToOrderItem")
+  orderItems         OrderItem[]         @relation("ProductToOrderItem")
+  addons             ProductAddon[]
+  ingredients        ProductIngredient[]
+  category           Category            @relation(fields: [categoryId], references: [id])
 
   @@map("products")
 }
 
-model Order {
-  id        String   @id @default(uuid())
-  table     Int?
-  status    Int      @default(0)
-  draft     Boolean  @default(true)
-  name      String?
-  editedBy  String[] @default([])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model ProductIngredient {
+  id           Int        @id @default(autoincrement())
+  productId    Int
+  ingredientId Int
+  createdAt    DateTime   @default(now())
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-  items  OrderItem[]
-  user   User?       @relation(fields: [userId], references: [id]) // Relacionamento com a tabela User
-  userId String?
+  @@unique([productId, ingredientId])
+  @@map("product_ingredients")
+}
+
+model ProductAddon {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  addonId   Int
+  createdAt DateTime @default(now())
+  addon     Addon    @relation(fields: [addonId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, addonId])
+  @@map("product_addons")
+}
+
+model Order {
+  id        String      @id @default(uuid())
+  table     String      // Mesa/Nome (pode ser número ou nome)
+  status    Int         @default(0)
+  draft     Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  userId    String
+  items     OrderItem[]
+  user      User        @relation(fields: [userId], references: [id])
 
   @@map("orders")
 }
 
 model OrderItem {
-  id        String   @id @default(uuid())
-  amount    Int
-  client    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  order   Order   @relation(fields: [orderId], references: [id])
-  product Product @relation(fields: [productId], references: [id])
-
-  orderId   String
-  productId String
-
-  observacoes OrderItemDetail[]
+  id           String           @id @default(uuid())
+  amount       Int              @default(1)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  orderId      String
+  productId    Int
+  meatChoiceId Int?
+  meatPoint    String?          // Ponto da carne (mal passada, . pra mal, ao ponto, . pra bem, bem passada)
+  notes        String?
+  removals     String[]         @default([])
+  takenToTable Boolean          @default(false) // Se o item já foi levado para a mesa
+  meatChoice   Product?         @relation("MeatChoiceToOrderItem", fields: [meatChoiceId], references: [id])
+  order        Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product      Product          @relation("ProductToOrderItem", fields: [productId], references: [id])
+  additions    OrderItemAddon[]
 
   @@map("items")
 }
 
-model OrderItemDetail {
-  id         String   @id @default(uuid())
-  ponto      String?
-  observacao String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  item OrderItem @relation(fields: [orderItemId], references: [id])
-
+model OrderItemAddon {
+  id          String    @id @default(uuid())
   orderItemId String
+  addonId     Int
+  createdAt   DateTime  @default(now())
+  addon       Addon     @relation(fields: [addonId], references: [id])
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
 
-  @@map("order_item_details")
+  @@map("order_item_addons")
+}
+
+model WaitingQueue {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("waiting_queue")
 }

@@ -1,9 +1,12 @@
 import { Request, Response } from "express";
 import { CreateCategoryService } from "../../services/category/CreateCategoryService";
+import { createCategorySchema } from "../../validations/categoryValidations";
 
 class CreateCategoryController {
   async handle(req: Request, res: Response) {
-    const { name } = req.body;
+    // Validar dados de entrada
+    const validatedData = createCategorySchema.parse(req.body);
+    const { name } = validatedData;
 
     const createCategoryService = new CreateCategoryService();
 

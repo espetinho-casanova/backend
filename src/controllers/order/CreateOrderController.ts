@@ -1,20 +1,23 @@
 import { Request, Response } from "express";
 import { CreateOrderService } from "../../services/order/CreateOrderService";
+import { createOrderSchema } from "../../validations/orderValidations";
 
 class CreateOrderController {
   async handle(req: Request, res: Response) {
-    const { table, name, status, draft } = req.body;
+    // Validar dados de entrada
+    const validatedData = createOrderSchema.parse(req.body);
+    const { table, status, draft, items } = validatedData;
 
     const userId = req.userId;
 
-    const createOrderController = new CreateOrderService();
+    const createOrderService = new CreateOrderService();
 
-    const order = await createOrderController.execute({
+    const order = await createOrderService.execute({
       table,
-      name,
       userId,
       draft,
       status,
+      items, // Array de itens do pedido (opcional)
     });
 
     return res.json(order);

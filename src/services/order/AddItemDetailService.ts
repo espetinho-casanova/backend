@@ -16,8 +16,6 @@ class AddItemDetailService {
       },
     });
 
-    console.log("teste");
-
     return addItemDetail;
   }
 }
