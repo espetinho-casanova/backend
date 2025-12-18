@@ -116,7 +116,7 @@ class ProductsOrderService {
         table: order?.table,
         status: order?.status,
         draft: order?.draft,
-        name: order?.name,
+        name: order?.table,
         userId: order?.userId,
         userName: userName, // Nome do garçom
         orderTotal: orderTotal, // Total do pedido

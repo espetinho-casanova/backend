@@ -19,7 +19,7 @@ class ToggleItemTakenToTableController {
       return res.json(item);
     } catch (error: any) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors[0].message });
+        return res.status(400).json({ error: error.issues[0].message });
       }
       return res.status(400).json({ error: error.message });
     }

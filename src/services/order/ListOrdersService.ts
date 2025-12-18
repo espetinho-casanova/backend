@@ -114,7 +114,7 @@ class ListOrdersService {
         table: order.table,
         status: order.status,
         draft: order.draft,
-        name: order.name,
+        name: order.table,
         userId: order.userId,
         createdAt: order.createdAt,
         updatedAt: order.updatedAt,
@@ -124,7 +124,7 @@ class ListOrdersService {
             table: order.table,
             status: order.status,
             draft: order.draft,
-            name: order.name,
+            name: order.table,
             userId: order.userId,
             userName: order.user?.name || null, // Nome do garçom
             orderTotal: orderTotal,

@@ -11,11 +11,11 @@ export function errorHandler(
 
   if (err instanceof ZodError) {
     if (!isProduction) {
-      console.error("ZodError:", JSON.stringify(err.errors, null, 2));
+      console.error("ZodError:", JSON.stringify(err.issues, null, 2));
     }
 
-    const errors = Array.isArray(err.errors) && err.errors.length > 0
-      ? err.errors.map((error) => ({
+    const errors = Array.isArray(err.issues) && err.issues.length > 0
+      ? err.issues.map((error) => ({
         field: Array.isArray(error.path) && error.path.length > 0
           ? error.path.join(".")
           : error.path || "unknown",

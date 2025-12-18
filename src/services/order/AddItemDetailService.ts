@@ -8,15 +8,15 @@ interface ItemDetailRequest {
 
 class AddItemDetailService {
   async execute({ observacao, orderItemId, ponto }: ItemDetailRequest) {
-    const addItemDetail = await prismaClient.orderItemDetail.create({
+    const updatedItem = await prismaClient.orderItem.update({
+      where: { id: orderItemId },
       data: {
-        observacao: observacao,
-        ponto: ponto,
-        orderItemId: orderItemId,
+        notes: observacao,
+        meatPoint: ponto,
       },
     });
 
-    return addItemDetail;
+    return updatedItem;
   }
 }
 

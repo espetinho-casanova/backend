@@ -26,8 +26,10 @@ Configure as seguintes variáveis de ambiente no Render:
 
 ### Build Command:
 ```bash
-npm install && npx prisma generate && npm run build
+NODE_ENV=development npm ci && npx prisma generate && npx prisma migrate deploy && npm run build
 ```
+
+**Importante:** O `NODE_ENV=development` força a instalação de `devDependencies` (TypeScript e @types/node), que são necessárias para o build. Sem isso, o Render pode pular devDependencies se `NODE_ENV=production` estiver definido.
 
 ### Start Command:
 ```bash
@@ -55,7 +57,7 @@ npx prisma migrate deploy
 
 Ou configure no Render para executar automaticamente no build:
 ```bash
-npm install && npx prisma generate && npx prisma migrate deploy && npm run build
+NODE_ENV=development npm ci && npx prisma generate && npx prisma migrate deploy && npm run build
 ```
 
 ### 2. Seed (Popular banco com dados iniciais)
@@ -79,7 +81,7 @@ npx prisma db seed
 
 Configure o Build Command para executar a seed automaticamente após as migrations:
 ```bash
-npm install && npx prisma generate && npx prisma migrate deploy && npm run build && npx prisma db seed
+NODE_ENV=development npm ci && npx prisma generate && npx prisma migrate deploy && npm run build && npx prisma db seed
 ```
 
 ⚠️ **Atenção:** Esta opção executará a seed a cada deploy, limpando e recriando todos os dados. Use apenas no primeiro deploy ou quando quiser resetar o banco.

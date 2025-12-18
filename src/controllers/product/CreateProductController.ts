@@ -31,10 +31,10 @@ class CreateProductController {
       ? JSON.parse(addonIds).map((id: string) => parseInt(id, 10))
       : [];
     const parsedCanBeUsedInSandwich = canBeUsedInSandwich !== undefined
-      ? (canBeUsedInSandwich === "true" || canBeUsedInSandwich === true)
+      ? (typeof canBeUsedInSandwich === "string" ? canBeUsedInSandwich === "true" : Boolean(canBeUsedInSandwich))
       : true;
     const parsedHasMeatPoint = hasMeatPoint !== undefined
-      ? (hasMeatPoint === "true" || hasMeatPoint === true)
+      ? (typeof hasMeatPoint === "string" ? hasMeatPoint === "true" : Boolean(hasMeatPoint))
       : false;
 
     const createProductService = new CreateProductService();

@@ -2,15 +2,11 @@ import { z } from "zod";
 
 const envSchema = z.object({
   DATABASE_URL: z
-    .string({
-      required_error: "DATABASE_URL é obrigatória",
-    })
+    .string({ message: "DATABASE_URL é obrigatória" })
     .url("DATABASE_URL deve ser uma URL válida (ex: postgresql://user:password@localhost:5432/dbname)"),
 
   JWT_SECRET: z
-    .string({
-      required_error: "JWT_SECRET é obrigatória",
-    })
+    .string({ message: "JWT_SECRET é obrigatória" })
     .min(8, "JWT_SECRET deve ter pelo menos 8 caracteres para segurança"),
 
   CORS_ORIGIN: z
@@ -42,7 +38,7 @@ export function validateEnv(): Env {
     return envSchema.parse(process.env);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const missingVars = error.errors.map((err) => {
+      const missingVars = error.issues.map((err) => {
         const path = err.path.join(".");
         return `  - ${path}: ${err.message}`;
       }).join("\n");
